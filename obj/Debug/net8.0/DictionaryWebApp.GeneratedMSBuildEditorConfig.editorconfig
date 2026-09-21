@@ -18,6 +18,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = /Users/ekaterina/Desktop/курсовая/DictionaryWebApp
 build_property._RazorSourceGeneratorDebug = 
 
+[/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/Pages/Dict.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRGljdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -32,6 +36,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/Pages/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/Pages/Syno.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvU3luby5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/Pages/Trans.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVHJhbnMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/Pages/_ViewImports.cshtml]
