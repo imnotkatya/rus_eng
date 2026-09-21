@@ -82,3 +82,94 @@
 .result strong {
     font-weight: 600;
 }
+
+/* ===== Управление словарём ===== */
+.dict-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    background: #fff;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-group label {
+    font-weight: 500;
+    color: #333;
+}
+
+.control-group select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.control-group select:focus {
+    outline: none;
+    border-color: #2980B9;
+}
+
+.total-count {
+    margin-left: auto;
+    font-size: 15px;
+    color: #555;
+}
+
+.total-count strong {
+    color: #2980B9;
+    font-size: 17px;
+}
+
+/* ===== Таблица словаря ===== */
+.dict-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.dict-table thead {
+    background: #2C3E50;
+    color: #fff;
+}
+
+.dict-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.dict-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.dict-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.dict-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.dict-table .word {
+    font-weight: 600;
+    color: #2C3E50;
+    width: 30%;
+}

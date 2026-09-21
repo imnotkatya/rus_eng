@@ -1,8 +1,75 @@
 @page
-@model TransModel
+@model DictionaryWebApp.Pages.DictModel
+@using DictionaryWebApp.Models
 @{
-    ViewData["Title"] = "ss";
+    ViewData["Title"] = "Словарь";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Dict</p>
+<h1>📚 Словарь</h1>
+
+<form method="get" class="dict-controls">
+
+    <div class="control-group">
+        <label for="Mode">Направление:</label>
+        <select name="Mode" id="Mode" onchange="this.form.submit()">
+            @if (Model.Mode == TranslationMode.EngToRus)
+            {
+                <option value="EngToRus" selected>Англо → Русский</option>
+                <option value="RusToEng">Русский → Английский</option>
+            }
+            else
+            {
+                <option value="EngToRus">Англо → Русский</option>
+                <option value="RusToEng" selected>Русский → Английский</option>
+            }
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label for="Ascending">Сортировка:</label>
+        <select name="Ascending" id="Ascending" onchange="this.form.submit()">
+            @if (Model.Ascending)
+            {
+                <option value="true" selected>А → Я</option>
+                <option value="false">Я → А</option>
+            }
+            else
+            {
+                <option value="true">А → Я</option>
+                <option value="false" selected>Я → А</option>
+            }
+        </select>
+    </div>
+
+    <div class="total-count">
+        Всего слов: <strong>@Model.TotalCount</strong>
+    </div>
+
+</form>
+
+@if (Model.Words.Count == 0)
+{
+    <div class="result error">
+        ⚠️ Словарь пуст. Проверьте файл <code>Data/dictionary.txt</code>.
+    </div>
+}
+else
+{
+    <table class="dict-table">
+        <thead>
+            <tr>
+                <th>@Model.FirstColumnTitle</th>
+                <th>@Model.SecondColumnTitle</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pair in Model.Words)
+            {
+                <tr>
+                    <td class="word">@pair.Key</td>
+                    <td>@string.Join(", ", pair.Value)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
