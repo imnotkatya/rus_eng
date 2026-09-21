@@ -1,8 +1,55 @@
 @page
-@model TransModel
+@model DictionaryWebApp.Pages.TransModel
+@using DictionaryWebApp.Models
 @{
-    ViewData["Title"] = "ss";
+    ViewData["Title"] = "Перевод";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Trans</p>
+<h1>🔤 Перевод слова</h1>
+
+<form method="post" class="translate-form">
+
+    <div class="mode-switch">
+        <label>
+            <input type="radio" asp-for="Mode" value="EngToRus" />
+            Англо → Русский
+        </label>
+        <label>
+            <input type="radio" asp-for="Mode" value="RusToEng" />
+            Русский → Английский
+        </label>
+    </div>
+
+    <div class="input-row">
+        <input type="text"
+               asp-for="Word"
+               placeholder="Введите слово..."
+               autofocus />
+        <button type="submit">Перевести</button>
+    </div>
+
+</form>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="result error">
+        ⚠️ @Model.ErrorMessage
+    </div>
+}
+
+@if (Model.Searched && Model.ErrorMessage == null)
+{
+    @if (Model.Translations != null && Model.Translations.Count > 0)
+    {
+        <div class="result success">
+            <strong>@Model.Word</strong> —
+            @string.Join(", ", Model.Translations)
+        </div>
+    }
+    else
+    {
+        <div class="result error">
+            ⚠️ Слово «@Model.Word» не найдено в словаре.
+        </div>
+    }
+}

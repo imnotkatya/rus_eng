@@ -1,8 +1,14 @@
+using DictionaryWebApp.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-
+builder.Services.AddSingleton<IDictionaryService>(sp =>
+{
+    var env = sp.GetRequiredService<IWebHostEnvironment>();
+    var path = Path.Combine(env.ContentRootPath, "Data", "dictionary.txt");
+    return new DictionaryService(path);
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

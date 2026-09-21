@@ -28,3 +28,4 @@
 /Users/ekaterina/Desktop/курсовая/DictionaryWebApp/obj/Debug/net8.0/DictionaryWebApp.pdb
 /Users/ekaterina/Desktop/курсовая/DictionaryWebApp/obj/Debug/net8.0/DictionaryWebApp.genruntimeconfig.cache
 /Users/ekaterina/Desktop/курсовая/DictionaryWebApp/obj/Debug/net8.0/ref/DictionaryWebApp.dll
+/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/obj/Debug/net8.0/DictionaryWebApp.sourcelink.json
