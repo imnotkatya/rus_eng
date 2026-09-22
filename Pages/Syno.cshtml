@@ -1,8 +1,35 @@
 @page
-@model TransModel
+@model DictionaryWebApp.Pages.SynoModel
 @{
-    ViewData["Title"] = "ss";
+    ViewData["Title"] = "Синонимы";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Syno</p>
+<h1>🔁 Слова с несколькими переводами</h1>
+
+@if (Model.Words.Count == 0)
+{
+    <div class="result error">
+        ⚠️ В словаре нет слов с несколькими переводами.
+    </div>
+}
+else
+{
+    <p class="syno-count">
+        Найдено слов: <strong>@Model.Words.Count</strong>
+    </p>
+
+    <div class="syno-list">
+        @foreach (var pair in Model.Words)
+        {
+            <div class="syno-card">
+                <div class="syno-word">@pair.Key</div>
+                <div class="syno-translations">
+                    @foreach (var translation in pair.Value)
+                    {
+                        <span class="syno-tag">@translation</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -173,3 +173,59 @@
     color: #2C3E50;
     width: 30%;
 }
+
+/* ===== Страница синонимов ===== */
+.syno-count {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 16px;
+}
+
+.syno-count strong {
+    color: #2980B9;
+    font-size: 17px;
+}
+
+.syno-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.syno-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.syno-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.syno-word {
+    font-weight: 600;
+    font-size: 18px;
+    color: #2C3E50;
+    min-width: 120px;
+}
+
+.syno-translations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.syno-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #eaf4fc;
+    color: #21618c;
+    border-radius: 999px;
+    font-size: 14px;
+}
