@@ -10,20 +10,22 @@
 <form method="post" class="translate-form">
 
     <div class="mode-switch">
-        <label>
-            <input type="radio" asp-for="Mode" value="EngToRus" />
-            Англо → Русский
-        </label>
-        <label>
-            <input type="radio" asp-for="Mode" value="RusToEng" />
-            Русский → Английский
-        </label>
+        <span class="mode-title">Режим работы:</span>
+        @foreach (var dir in Model.Directions)
+        {
+            <label>
+                <input type="radio" asp-for="Mode" value="@dir.Mode.ToString()" />
+                @dir.Title (@dir.WordsCount сл.)
+            </label>
+        }
     </div>
 
     <div class="input-row">
         <input type="text"
                asp-for="Word"
-               placeholder="Введите слово..."
+               maxlength="50"
+               placeholder="@(Model.Mode == TranslationMode.EngToRus ? "Введите английское слово, например book" : "Введите русское слово, например дом")"
+               autocomplete="off"
                autofocus />
         <button type="submit">Перевести</button>
     </div>
@@ -37,13 +39,19 @@
     </div>
 }
 
-@if (Model.Searched && Model.ErrorMessage == null)
+@if (Model.Searched && Model.ErrorMessage == null && Model.Translations != null)
 {
-    @if (Model.Translations != null && Model.Translations.Count > 0)
+    @if (Model.Translations.Count > 0)
     {
         <div class="result success">
             <strong>@Model.Word</strong> —
-            @string.Join(", ", Model.Translations)
+            @(Model.Translations.Count == 1 ? "перевод:" : $"переводов: {Model.Translations.Count}")
+            <div class="syno-translations mt-2">
+                @foreach (var t in Model.Translations)
+                {
+                    <span class="syno-tag">@t</span>
+                }
+            </div>
         </div>
     }
     else

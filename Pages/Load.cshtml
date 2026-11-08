@@ -1,0 +1,54 @@
+@page
+@model DictionaryWebApp.Pages.LoadModel
+@{
+    ViewData["Title"] = "Загрузка словаря";
+}
+
+<h1>📂 Загрузка словаря</h1>
+
+<div class="translate-form">
+    <p class="mb-3">
+        Формат файла (.txt, UTF-8): одна запись в строке —
+        <code>английское_слово:перевод1,перевод2,...</code>,
+        например <code>book:книга,том,издание</code>.
+    </p>
+
+    <form method="post" asp-page-handler="Reload" class="mb-3">
+        <button type="submit" class="btn-main">Загрузить из Data/dictionary.txt</button>
+    </form>
+
+    <form method="post" asp-page-handler="Upload" enctype="multipart/form-data" class="input-row">
+        <input type="file" asp-for="Upload" accept=".txt" class="file-input" />
+        <button type="submit">Загрузить выбранный файл</button>
+    </form>
+</div>
+
+@if (Model.ErrorMessage != null)
+{
+    <div class="result error">⚠️ @Model.ErrorMessage</div>
+}
+
+@if (Model.Result.Success)
+{
+    <div class="result success">
+        ✅ @(Model.JustLoaded ? "Словарь загружен" : "Текущий словарь загружен")
+        из файла <strong>@Model.Result.FileName</strong>
+        (@Model.Result.LoadedAt.ToString("dd.MM.yyyy HH:mm:ss")):
+        записей — <strong>@Model.Result.LoadedRecords</strong>@(Model.Result.SkippedLines > 0 ? $", пропущено строк с ошибками — {Model.Result.SkippedLines}" : "").
+    </div>
+}
+
+@if (Model.Result.Errors.Count > 0)
+{
+    <div class="result error">
+        <strong>Ошибки в файле @Model.Result.FileName:</strong>
+        <ul class="mb-0">
+            @foreach (var error in Model.Result.Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<partial name="_Stats" model="Model.Stats" />

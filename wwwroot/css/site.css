@@ -1,3 +1,13 @@
+/* ===== Каркас страницы (подвал прижат к низу и не налезает на контент) ===== */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
 /* ===== Форма перевода ===== */
 .translate-form {
     background: #fff;
@@ -228,4 +238,104 @@
     color: #21618c;
     border-radius: 999px;
     font-size: 14px;
+}
+
+/* ===== Активный пункт меню ===== */
+.nav-link.active-page {
+    color: #2980B9 !important;
+    font-weight: 600;
+    border-bottom: 2px solid #2980B9;
+}
+
+/* ===== Статистика словаря ===== */
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    flex: 1 1 150px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+}
+
+.stat span {
+    font-size: 13px;
+    color: #777;
+}
+
+.stat strong {
+    font-size: 22px;
+    color: #2980B9;
+}
+
+/* ===== Загрузка словаря ===== */
+.btn-main {
+    padding: 10px 24px;
+    background: #2980B9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-main:hover {
+    background: #21618c;
+}
+
+.file-input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 15px;
+    background: #fff;
+}
+
+.result ul {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+
+/* ===== Мелочи ===== */
+.mode-title {
+    font-weight: 500;
+    color: #333;
+}
+
+.dict-table .num {
+    width: 60px;
+    color: #999;
+}
+
+.syno-dir {
+    font-size: 12px;
+    font-weight: 400;
+    color: #999;
+}
+
+/* ===== Узкие экраны ===== */
+@media (max-width: 576px) {
+    .input-row,
+    .mode-switch {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .total-count {
+        margin-left: 0;
+    }
+
+    .syno-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
 }

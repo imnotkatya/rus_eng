@@ -12,8 +12,9 @@ public class IndexModel : PageModel
         _logger = logger;
     }
 
-    public void OnGet()
+    // Главная страница сразу перенаправляет на словарь
+    public IActionResult OnGet()
     {
-
+        return RedirectToPage("/Dict");
     }
 }

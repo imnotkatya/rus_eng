@@ -9,35 +9,45 @@ namespace DictionaryWebApp.Services
     /// </summary>
     public interface IDictionaryService
     {
-        // ========== Загрузка из файла ==========
+        // ========== Загрузка «базы данных» из файла ==========
 
-        /// <summary>Загрузить базу данных словаря из файла.</summary>
-        void LoadFromFile();
+        /// <summary>Загрузить словарь из файла по умолчанию (Data/dictionary.txt).</summary>
+        LoadResult LoadFromFile();
+
+        /// <summary>Загрузить словарь из файла, выбранного пользователем.</summary>
+        LoadResult LoadFromStream(Stream stream, string fileName);
+
+        /// <summary>Результат последней загрузки.</summary>
+        LoadResult LastLoad { get; }
 
         // ========== Перевод ==========
 
-        /// <summary>Перевод английского слова на русский.</summary>
+        /// <summary>Перевод английского слова на русский (список переводов).</summary>
         List<string> TranslateEngToRus(string word);
 
-        /// <summary>Перевод русского слова на английский.</summary>
+        /// <summary>Перевод русского слова на английский (список переводов).</summary>
         List<string> TranslateRusToEng(string word);
 
-        // ========== Получение всего словаря (для сортировки) ==========
+        /// <summary>Перевод слова в заданном режиме.</summary>
+        List<string> Translate(string word, TranslationMode mode);
 
-        /// <summary>Получить весь англо-русский словарь, отсортированный по алфавиту.</summary>
-        SortedDictionary<string, List<string>> GetAllEngToRus();
+        // ========== Обобщённые списки ==========
 
-        /// <summary>Получить весь русско-английский словарь, отсортированный по алфавиту.</summary>
-        SortedDictionary<string, List<string>> GetAllRusToEng();
+        /// <summary>Сведения об английских словах (по алфавиту или в обратном порядке).</summary>
+        List<EnglishWord> GetEnglishWords(bool ascending = true);
 
-        // ========== Слова с синонимами ==========
+        /// <summary>Сведения о русских словах (по алфавиту или в обратном порядке).</summary>
+        List<RussianWord> GetRussianWords(bool ascending = true);
 
-        /// <summary>Получить слова, у которых больше одного перевода.</summary>
-        List<KeyValuePair<string, List<string>>> GetWordsWithSynonyms();
+        /// <summary>Сведения о синонимичных переводах (null — оба направления).</summary>
+        List<SynonymInfo> GetSynonyms(TranslationMode? direction = null);
+
+        /// <summary>Сведения о направлениях перевода.</summary>
+        List<TranslationDirection> GetDirections();
 
         // ========== Статистика ==========
 
-        /// <summary>Получить статистику по словарю.</summary>
+        /// <summary>Статистика словаря, в т.ч. общее количество записей.</summary>
         DictionaryStats GetStats();
     }
 }

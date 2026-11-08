@@ -1,10 +1,30 @@
 @page
 @model DictionaryWebApp.Pages.SynoModel
+@using DictionaryWebApp.Models
 @{
     ViewData["Title"] = "Синонимы";
 }
 
 <h1>🔁 Слова с несколькими переводами</h1>
+
+<form method="get" class="dict-controls">
+    <div class="control-group">
+        <label for="Mode">Направление:</label>
+        <select name="Mode" id="Mode" onchange="this.form.submit()">
+            <!option value="" selected="@(Model.Mode == null)">Оба направления</!option>
+            @foreach (var dir in Model.Directions)
+            {
+                <!option value="@dir.Mode" selected="@(dir.Mode == Model.Mode)">@dir.ShortTitle</!option>
+            }
+        </select>
+    </div>
+
+    <noscript><button type="submit">Показать</button></noscript>
+
+    <div class="total-count">
+        Найдено слов: <strong>@Model.Words.Count</strong>
+    </div>
+</form>
 
 @if (Model.Words.Count == 0)
 {
@@ -14,17 +34,16 @@
 }
 else
 {
-    <p class="syno-count">
-        Найдено слов: <strong>@Model.Words.Count</strong>
-    </p>
-
     <div class="syno-list">
-        @foreach (var pair in Model.Words)
+        @foreach (var item in Model.Words)
         {
             <div class="syno-card">
-                <div class="syno-word">@pair.Key</div>
+                <div class="syno-word">
+                    @item.Word
+                    <div class="syno-dir">@(item.Direction == TranslationMode.EngToRus ? "англ. → рус." : "рус. → англ.")</div>
+                </div>
                 <div class="syno-translations">
-                    @foreach (var translation in pair.Value)
+                    @foreach (var translation in item.Synonyms)
                     {
                         <span class="syno-tag">@translation</span>
                     }

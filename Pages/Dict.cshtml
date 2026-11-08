@@ -3,24 +3,21 @@
 @using DictionaryWebApp.Models
 @{
     ViewData["Title"] = "Словарь";
+    bool eng = Model.Mode == TranslationMode.EngToRus;
 }
 
 <h1>📚 Словарь</h1>
+
+<partial name="_Stats" model="Model.Stats" />
 
 <form method="get" class="dict-controls">
 
     <div class="control-group">
         <label for="Mode">Направление:</label>
         <select name="Mode" id="Mode" onchange="this.form.submit()">
-            @if (Model.Mode == TranslationMode.EngToRus)
+            @foreach (var dir in Model.Directions)
             {
-                <option value="EngToRus" selected>Англо → Русский</option>
-                <option value="RusToEng">Русский → Английский</option>
-            }
-            else
-            {
-                <option value="EngToRus">Англо → Русский</option>
-                <option value="RusToEng" selected>Русский → Английский</option>
+                <!option value="@dir.Mode" selected="@(dir.Mode == Model.Mode)">@dir.ShortTitle</!option>
             }
         </select>
     </div>
@@ -28,21 +25,15 @@
     <div class="control-group">
         <label for="Ascending">Сортировка:</label>
         <select name="Ascending" id="Ascending" onchange="this.form.submit()">
-            @if (Model.Ascending)
-            {
-                <option value="true" selected>А → Я</option>
-                <option value="false">Я → А</option>
-            }
-            else
-            {
-                <option value="true">А → Я</option>
-                <option value="false" selected>Я → А</option>
-            }
+            <!option value="true" selected="@Model.Ascending">@(eng ? "A → Z" : "А → Я")</!option>
+            <!option value="false" selected="@(!Model.Ascending)">@(eng ? "Z → A" : "Я → А")</!option>
         </select>
     </div>
 
+    <noscript><button type="submit">Показать</button></noscript>
+
     <div class="total-count">
-        Всего слов: <strong>@Model.TotalCount</strong>
+        Слов в списке: <strong>@Model.Words.Count</strong>
     </div>
 
 </form>
@@ -50,7 +41,7 @@
 @if (Model.Words.Count == 0)
 {
     <div class="result error">
-        ⚠️ Словарь пуст. Проверьте файл <code>Data/dictionary.txt</code>.
+        ⚠️ Словарь пуст. Загрузите его на странице <a asp-page="/Load">«Загрузка»</a>.
     </div>
 }
 else
@@ -58,14 +49,18 @@ else
     <table class="dict-table">
         <thead>
             <tr>
+                <th>№</th>
                 <th>@Model.FirstColumnTitle</th>
                 <th>@Model.SecondColumnTitle</th>
             </tr>
         </thead>
         <tbody>
+            @{ int n = 0; }
             @foreach (var pair in Model.Words)
             {
+                n++;
                 <tr>
+                    <td class="num">@n</td>
                     <td class="word">@pair.Key</td>
                     <td>@string.Join(", ", pair.Value)</td>
                 </tr>

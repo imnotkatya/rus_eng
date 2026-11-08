@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "06R8zYeCQP2ykHKotfN0jK20rJlFXbO/n2kE+ICPiCRibvnXr+rGuCySIGCzxlzvuudI/V8SQyrA6HHlQjSi3g==",
+  "dgSpecHash": "8gPhCB+pagc=",
   "success": true,
   "projectFilePath": "/Users/ekaterina/Desktop/курсовая/DictionaryWebApp/DictionaryWebApp.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/Users/ekaterina/.nuget/packages/microsoft.netcore.app.ref/8.0.33/microsoft.netcore.app.ref.8.0.33.nupkg.sha512",
+    "/Users/ekaterina/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.33/microsoft.aspnetcore.app.ref.8.0.33.nupkg.sha512",
+    "/Users/ekaterina/.nuget/packages/microsoft.netcore.app.host.osx-arm64/8.0.33/microsoft.netcore.app.host.osx-arm64.8.0.33.nupkg.sha512"
+  ],
   "logs": []
 }
