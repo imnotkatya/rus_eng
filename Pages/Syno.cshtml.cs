@@ -5,32 +5,25 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace DictionaryWebApp.Pages
 {
-    /// <summary>
-    /// Пункт меню «Синонимы»: слова, имеющие несколько синонимичных переводов.
-    /// </summary>
+    // страница «Синонимы»: слова, у которых несколько переводов
     public class SynoModel : PageModel
     {
-        private readonly IDictionaryService _dictionary;
+        private IDictionaryService dictionary;
 
-        public SynoModel(IDictionaryService dictionary)
+        public SynoModel(IDictionaryService dict)
         {
-            _dictionary = dictionary;
+            dictionary = dict;
         }
 
-        /// <summary>Направление перевода; null — оба направления.</summary>
+        // направление из адреса; если не выбрано (null) — показываю оба
         [BindProperty(SupportsGet = true)]
         public TranslationMode? Mode { get; set; }
 
-        /// <summary>Список направлений перевода.</summary>
-        public List<TranslationDirection> Directions { get; set; } = new();
-
-        /// <summary>Слова с несколькими переводами.</summary>
-        public List<SynonymInfo> Words { get; set; } = new();
+        public List<SynonymInfo> Words { get; set; } = new List<SynonymInfo>();
 
         public void OnGet()
         {
-            Directions = _dictionary.GetDirections();
-            Words = _dictionary.GetSynonyms(Mode);
+            Words = dictionary.GetSynonyms(Mode);
         }
     }
 }

@@ -18,7 +18,7 @@
     </form>
 
     <form method="post" asp-page-handler="Upload" enctype="multipart/form-data" class="input-row">
-        <input type="file" asp-for="Upload" accept=".txt" class="file-input" />
+        <input type="file" name="Upload" accept=".txt" class="file-input" />
         <button type="submit">Загрузить выбранный файл</button>
     </form>
 </div>
@@ -31,10 +31,10 @@
 @if (Model.Result.Success)
 {
     <div class="result success">
-        ✅ @(Model.JustLoaded ? "Словарь загружен" : "Текущий словарь загружен")
-        из файла <strong>@Model.Result.FileName</strong>
+        ✅ Словарь загружен из файла <strong>@Model.Result.FileName</strong>
         (@Model.Result.LoadedAt.ToString("dd.MM.yyyy HH:mm:ss")):
-        записей — <strong>@Model.Result.LoadedRecords</strong>@(Model.Result.SkippedLines > 0 ? $", пропущено строк с ошибками — {Model.Result.SkippedLines}" : "").
+        записей — <strong>@Model.Result.LoadedRecords</strong>,
+        пропущено строк с ошибками — @Model.Result.SkippedLines.
     </div>
 }
 
@@ -43,7 +43,7 @@
     <div class="result error">
         <strong>Ошибки в файле @Model.Result.FileName:</strong>
         <ul class="mb-0">
-            @foreach (var error in Model.Result.Errors)
+            @foreach (string error in Model.Result.Errors)
             {
                 <li>@error</li>
             }

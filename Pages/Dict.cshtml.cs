@@ -5,62 +5,55 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace DictionaryWebApp.Pages
 {
-    /// <summary>
-    /// Пункт меню «Словарь»: список английских (или русских) слов
-    /// по алфавиту с переводами, сортировка и общее количество записей.
-    /// </summary>
+    // страница «Словарь»: все слова по алфавиту
     public class DictModel : PageModel
     {
-        private readonly IDictionaryService _dictionary;
+        private IDictionaryService dictionary;
 
-        public DictModel(IDictionaryService dictionary)
+        public DictModel(IDictionaryService dict)
         {
-            _dictionary = dictionary;
+            dictionary = dict;
         }
 
-        /// <summary>Выбранное направление перевода.</summary>
+        // эти два значения приходят из адреса, например /Dict?Mode=RusToEng&Ascending=false
         [BindProperty(SupportsGet = true)]
         public TranslationMode Mode { get; set; } = TranslationMode.EngToRus;
 
-        /// <summary>Сортировка: true — по алфавиту (А→Я), false — в обратном порядке (Я→А).</summary>
         [BindProperty(SupportsGet = true)]
         public bool Ascending { get; set; } = true;
 
-        /// <summary>Список направлений перевода.</summary>
-        public List<TranslationDirection> Directions { get; set; } = new();
+        // строки таблицы: слово и его переводы (номер i в обоих списках — одна строка)
+        public List<string> Words { get; set; } = new List<string>();
+        public List<string> Translations { get; set; } = new List<string>();
 
-        /// <summary>Строки таблицы: слово и его переводы.</summary>
-        public List<KeyValuePair<string, List<string>>> Words { get; set; } = new();
-
-        /// <summary>Заголовок первой колонки.</summary>
         public string FirstColumnTitle { get; set; } = "";
-
-        /// <summary>Заголовок второй колонки.</summary>
         public string SecondColumnTitle { get; set; } = "";
-
-        /// <summary>Статистика словаря (общее количество записей и др.).</summary>
-        public DictionaryStats Stats { get; set; } = new();
+        public DictionaryStats Stats { get; set; } = new DictionaryStats();
+        public IEnumerable<TranslationDirection> Directions { get; internal set; }
 
         public void OnGet()
         {
-            Directions = _dictionary.GetDirections();
-            Stats = _dictionary.GetStats();
+            Stats = dictionary.GetStats();
 
             if (Mode == TranslationMode.EngToRus)
             {
-                // Запрос: список английских слов по алфавиту с русскими переводами
-                Words = _dictionary.GetEnglishWords(Ascending)
-                    .Select(w => new KeyValuePair<string, List<string>>(w.Word, w.Translations))
-                    .ToList();
+                // английские слова с русскими переводами
+                foreach (EnglishWord w in dictionary.GetEnglishWords(Ascending))
+                {
+                    Words.Add(w.Word);
+                    Translations.Add(string.Join(", ", w.Translations));
+                }
                 FirstColumnTitle = "Английское слово";
                 SecondColumnTitle = "Русские переводы";
             }
             else
             {
-                // Запрос: список русских слов по алфавиту с английскими переводами
-                Words = _dictionary.GetRussianWords(Ascending)
-                    .Select(w => new KeyValuePair<string, List<string>>(w.Word, w.Translations))
-                    .ToList();
+                // русские слова с английскими переводами
+                foreach (RussianWord w in dictionary.GetRussianWords(Ascending))
+                {
+                    Words.Add(w.Word);
+                    Translations.Add(string.Join(", ", w.Translations));
+                }
                 FirstColumnTitle = "Русское слово";
                 SecondColumnTitle = "Английские переводы";
             }

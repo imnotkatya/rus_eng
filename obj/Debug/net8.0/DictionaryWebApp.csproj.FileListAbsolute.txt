@@ -32,3 +32,12 @@
 /Users/ekaterina/Desktop/курсовая/DictionaryWebApp/obj/Debug/net8.0/staticwebassets.build.json.cache
 /Users/ekaterina/Desktop/курсовая/DictionaryWebApp/obj/Debug/net8.0/staticwebassets.build.endpoints.json
 /Users/ekaterina/Desktop/курсовая/DictionaryWebApp/obj/Debug/net8.0/swae.build.ex.cache
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/appsettings.Development.json
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/appsettings.json
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/DictionaryWebApp.staticwebassets.runtime.json
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/DictionaryWebApp.staticwebassets.endpoints.json
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/DictionaryWebApp
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/DictionaryWebApp.deps.json
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/DictionaryWebApp.runtimeconfig.json
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/DictionaryWebApp.dll
+/private/tmp/claude-501/-Users-ekaterina--claude-spares-spare-iKJi1Q/ec6f5280-7df9-455a-9ec3-292f281aaec0/scratchpad/buildcheck/DictionaryWebApp.pdb

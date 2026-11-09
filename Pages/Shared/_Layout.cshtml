@@ -1,62 +1,50 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DictionaryWebApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/DictionaryWebApp.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @{
+        // адрес открытой страницы, например "/Trans" — чтобы подсветить пункт меню
+        string page = Context.Request.Path;
+    }
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Dict">Словарь EN–RU</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Меню">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        @{
-                            // Пункты меню программы
-                            var menu = new (string Page, string Title)[]
-                            {
-                                ("/Load", "Загрузка"),
-                                ("/Trans", "Перевод"),
-                                ("/Dict", "Словарь"),
-                                ("/Syno", "Синонимы")
-                            };
-                            var current = ViewContext.RouteData.Values["page"]?.ToString();
-                        }
-                        @foreach (var item in menu)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark @(current == item.Page ? "active-page" : "")" asp-page="@item.Page">@item.Title</a>
-                            </li>
-                        }
-                    </ul>
-                </div>
+                <a class="navbar-brand" href="/Dict">Словарь EN–RU</a>
+                <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(page == "/Load" ? "active-page" : "")" href="/Load">Загрузка</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(page == "/Trans" ? "active-page" : "")" href="/Trans">Перевод</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(page == "/Dict" ? "active-page" : "")" href="/Dict">Словарь</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark @(page == "/Syno" ? "active-page" : "")" href="/Syno">Синонимы</a>
+                    </li>
+                </ul>
             </div>
         </nav>
     </header>
+
     <div class="container">
-        <main role="main" class="pb-3">
+        <main class="pb-3">
             @RenderBody()
         </main>
     </div>
 
     <footer class="border-top footer text-muted">
         <div class="container">
-          Быданова Екатерина Олеговна 581573
+            Быданова Екатерина Олеговна 581573
         </div>
     </footer>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

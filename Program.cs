@@ -1,31 +1,17 @@
 using DictionaryWebApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Подключаем страницы Razor
 builder.Services.AddRazorPages();
-builder.Services.AddSingleton<IDictionaryService>(sp =>
-{
-    var env = sp.GetRequiredService<IWebHostEnvironment>();
-    var path = Path.Combine(env.ContentRootPath, "Data", "dictionary.txt");
-    return new DictionaryService(path);
-});
+
+// Создаём словарь один раз на всю программу
+string path = Path.Combine(builder.Environment.ContentRootPath, "Data", "dictionary.txt");
+builder.Services.AddSingleton<IDictionaryService>(new DictionaryService(path));
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.MapRazorPages();
+app.UseStaticFiles();   // отдаём стили и скрипты из wwwroot
+app.MapRazorPages();    // подключаем страницы из папки Pages
 
 app.Run();

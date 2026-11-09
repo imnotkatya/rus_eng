@@ -1,17 +1,15 @@
 namespace DictionaryWebApp.Models
 {
-    /// <summary>
-    /// Сведения об английском слове (элемент обобщённого списка английских слов).
-    /// </summary>
+    // английское слово и его русские переводы
     public class EnglishWord
     {
-        /// <summary>Английское слово.</summary>
-        public string Word { get; init; } = "";
+        public string Word { get; set; } = "";
+        public List<string> Translations { get; set; } = new List<string>();
 
-        /// <summary>Русские переводы слова (синонимичные переводы).</summary>
-        public List<string> Translations { get; init; } = new();
-
-        /// <summary>Имеет ли слово несколько синонимичных переводов.</summary>
-        public bool HasSynonyms => Translations.Count > 1;
+        // true, если переводов больше одного
+        public bool HasSynonyms
+        {
+            get { return Translations.Count > 1; }
+        }
     }
 }

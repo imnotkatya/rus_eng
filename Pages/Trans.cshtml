@@ -11,22 +11,19 @@
 
     <div class="mode-switch">
         <span class="mode-title">Режим работы:</span>
-        @foreach (var dir in Model.Directions)
-        {
-            <label>
-                <input type="radio" asp-for="Mode" value="@dir.Mode.ToString()" />
-                @dir.Title (@dir.WordsCount сл.)
-            </label>
-        }
+        <label>
+            <input type="radio" name="Mode" value="EngToRus" checked="@(Model.Mode == TranslationMode.EngToRus)" />
+            Англо-русский (@Model.Directions[0].WordsCount сл.)
+        </label>
+        <label>
+            <input type="radio" name="Mode" value="RusToEng" checked="@(Model.Mode == TranslationMode.RusToEng)" />
+            Русско-английский (@Model.Directions[1].WordsCount сл.)
+        </label>
     </div>
 
     <div class="input-row">
-        <input type="text"
-               asp-for="Word"
-               maxlength="50"
-               placeholder="@(Model.Mode == TranslationMode.EngToRus ? "Введите английское слово, например book" : "Введите русское слово, например дом")"
-               autocomplete="off"
-               autofocus />
+        <input type="text" id="Word" name="Word" value="@Model.Word" maxlength="50"
+               placeholder="Введите слово, например book или дом" autocomplete="off" autofocus />
         <button type="submit">Перевести</button>
     </div>
 
@@ -34,20 +31,17 @@
 
 @if (Model.ErrorMessage != null)
 {
-    <div class="result error">
-        ⚠️ @Model.ErrorMessage
-    </div>
+    <div class="result error">⚠️ @Model.ErrorMessage</div>
 }
 
-@if (Model.Searched && Model.ErrorMessage == null && Model.Translations != null)
+@if (Model.Translations != null)
 {
-    @if (Model.Translations.Count > 0)
+    if (Model.Translations.Count > 0)
     {
         <div class="result success">
-            <strong>@Model.Word</strong> —
-            @(Model.Translations.Count == 1 ? "перевод:" : $"переводов: {Model.Translations.Count}")
+            <strong>@Model.Word</strong> — переводов: @Model.Translations.Count
             <div class="syno-translations mt-2">
-                @foreach (var t in Model.Translations)
+                @foreach (string t in Model.Translations)
                 {
                     <span class="syno-tag">@t</span>
                 }
@@ -56,8 +50,6 @@
     }
     else
     {
-        <div class="result error">
-            ⚠️ Слово «@Model.Word» не найдено в словаре.
-        </div>
+        <div class="result error">⚠️ Слово «@Model.Word» не найдено в словаре.</div>
     }
 }

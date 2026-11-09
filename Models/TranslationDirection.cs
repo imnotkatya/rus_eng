@@ -1,26 +1,18 @@
 namespace DictionaryWebApp.Models
 {
-    /// <summary>
-    /// Сведения о направлении перевода (элемент обобщённого списка направлений).
-    /// </summary>
+    // направление перевода (их два: англо-русский и русско-английский)
     public class TranslationDirection
     {
-        /// <summary>Режим работы, которому соответствует направление.</summary>
-        public TranslationMode Mode { get; init; }
+        public TranslationMode Mode { get; set; }
+        public string Title { get; set; } = "";            // например «Англо-русский»
+        public string SourceLanguage { get; set; } = "";   // с какого языка
+        public string TargetLanguage { get; set; } = "";   // на какой язык
+        public int WordsCount { get; set; }                // сколько слов в этом направлении
 
-        /// <summary>Название направления, например «Англо-русский».</summary>
-        public string Title { get; init; } = "";
-
-        /// <summary>Язык исходного слова.</summary>
-        public string SourceLanguage { get; init; } = "";
-
-        /// <summary>Язык перевода.</summary>
-        public string TargetLanguage { get; init; } = "";
-
-        /// <summary>Количество слов, доступных для перевода в этом направлении.</summary>
-        public int WordsCount { get; set; }
-
-        /// <summary>Короткая подпись для меню, например «Англо → Русский».</summary>
-        public string ShortTitle => $"{SourceLanguage} → {TargetLanguage}";
+        // короткая подпись, например «Англо → Русский»
+        public string ShortTitle
+        {
+            get { return SourceLanguage + " → " + TargetLanguage; }
+        }
     }
 }

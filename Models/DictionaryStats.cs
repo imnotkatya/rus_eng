@@ -1,26 +1,13 @@
 namespace DictionaryWebApp.Models
 {
-    /// <summary>
-    /// Статистика словаря.
-    /// </summary>
+    // цифры для плиток статистики
     public class DictionaryStats
     {
-        /// <summary>Общее количество записей в словаре (строк «слово:переводы»).</summary>
-        public int RecordsCount { get; set; }
-
-        /// <summary>Количество английских слов.</summary>
-        public int EngWordsCount { get; set; }
-
-        /// <summary>Количество русских слов.</summary>
-        public int RusWordsCount { get; set; }
-
-        /// <summary>Общее количество пар «слово — перевод».</summary>
-        public int TranslationPairsCount { get; set; }
-
-        /// <summary>Количество английских слов с несколькими переводами.</summary>
-        public int EngWordsWithSynonymsCount { get; set; }
-
-        /// <summary>Количество русских слов с несколькими переводами.</summary>
-        public int RusWordsWithSynonymsCount { get; set; }
+        public int RecordsCount { get; set; }                 // записей в словаре
+        public int EngWordsCount { get; set; }                // английских слов
+        public int RusWordsCount { get; set; }                // русских слов
+        public int TranslationPairsCount { get; set; }        // пар «слово — перевод»
+        public int EngWordsWithSynonymsCount { get; set; }    // англ. слов с несколькими переводами
+        public int RusWordsWithSynonymsCount { get; set; }    // рус. слов с несколькими переводами
     }
 }

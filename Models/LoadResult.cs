@@ -1,26 +1,13 @@
 namespace DictionaryWebApp.Models
 {
-    /// <summary>
-    /// Результат загрузки «базы данных» словаря из файла.
-    /// </summary>
+    // что получилось при загрузке файла
     public class LoadResult
     {
-        /// <summary>Успешно ли загружен словарь.</summary>
-        public bool Success { get; set; }
-
-        /// <summary>Имя загруженного файла.</summary>
-        public string FileName { get; set; } = "";
-
-        /// <summary>Количество загруженных записей.</summary>
-        public int LoadedRecords { get; set; }
-
-        /// <summary>Количество пропущенных (ошибочных) строк.</summary>
-        public int SkippedLines { get; set; }
-
-        /// <summary>Описание ошибок в файле.</summary>
-        public List<string> Errors { get; } = new();
-
-        /// <summary>Время загрузки.</summary>
-        public DateTime LoadedAt { get; set; } = DateTime.Now;
+        public bool Success { get; set; }                  // загрузился ли словарь
+        public string FileName { get; set; } = "";         // имя файла
+        public int LoadedRecords { get; set; }             // сколько записей загрузилось
+        public int SkippedLines { get; set; }              // сколько строк с ошибками
+        public List<string> Errors { get; set; } = new List<string>();   // тексты ошибок
+        public DateTime LoadedAt { get; set; } = DateTime.Now;           // когда загрузили
     }
 }

@@ -4,377 +4,322 @@ using DictionaryWebApp.Models;
 
 namespace DictionaryWebApp.Services
 {
-    /// <summary>
-    /// Реализация сервиса словаря.
-    /// «База данных» словаря хранится в виде двух контейнеров типа map:
-    ///   - _engToRus — англо-русский словарь;
-    ///   - _rusToEng — русско-английский словарь.
-    /// В C# аналогом std::map (C++) является SortedDictionary —
-    /// ключи в нём всегда упорядочены по алфавиту.
-    /// На основе контейнеров формируются обобщённые списки (List&lt;T&gt;):
-    /// английских слов, русских слов, синонимичных переводов и направлений перевода.
-    /// </summary>
+    // Тут вся логика словаря: загрузка из файла, перевод, списки и статистика.
+    // Словарь храню в двух контейнерах map (в C# это SortedDictionary),
+    // они сами держат слова по алфавиту.
     public class DictionaryService : IDictionaryService
     {
-        // ============================================================
-        //  БАЗА ДАННЫХ СЛОВАРЯ — ДВА КОНТЕЙНЕРА ТИПА MAP
-        // ============================================================
+        // сравниваю слова по русскому алфавиту и без учёта регистра (Book = book)
+        private static StringComparer comparer = StringComparer.Create(new CultureInfo("ru-RU"), true);
 
-        /// <summary>Сравнение строк по алфавиту без учёта регистра (Apple = apple).</summary>
-        private static readonly StringComparer WordComparer = CreateComparer();
+        // два контейнера: book -> [книга, том, издание] и том -> [book, volume]
+        private SortedDictionary<string, List<string>> engToRus = new SortedDictionary<string, List<string>>(comparer);
+        private SortedDictionary<string, List<string>> rusToEng = new SortedDictionary<string, List<string>>(comparer);
 
-        /// <summary>Контейнер №1: англо-русский словарь (англ. слово → список рус. переводов).</summary>
-        private SortedDictionary<string, List<string>> _engToRus = new(WordComparer);
+        // обобщённые списки (по заданию)
+        private List<EnglishWord> englishWords = new List<EnglishWord>();
+        private List<RussianWord> russianWords = new List<RussianWord>();
+        private List<SynonymInfo> synonyms = new List<SynonymInfo>();
+        private List<TranslationDirection> directions = new List<TranslationDirection>();
 
-        /// <summary>Контейнер №2: русско-английский словарь (рус. слово → список англ. переводов).</summary>
-        private SortedDictionary<string, List<string>> _rusToEng = new(WordComparer);
+        // путь к Data/dictionary.txt
+        private string filePath;
 
-        // ============================================================
-        //  ОБОБЩЁННЫЕ СПИСКИ
-        // ============================================================
+        // чем закончилась последняя загрузка (показываю на странице Загрузка)
+        public LoadResult LastLoad { get; set; } = new LoadResult();
 
-        /// <summary>Список №1: сведения об английских словах.</summary>
-        private List<EnglishWord> _englishWords = new();
-
-        /// <summary>Список №2: сведения о русских словах.</summary>
-        private List<RussianWord> _russianWords = new();
-
-        /// <summary>Список №3: сведения о синонимичных переводах.</summary>
-        private List<SynonymInfo> _synonyms = new();
-
-        /// <summary>Список №4: сведения о направлениях перевода.</summary>
-        private readonly List<TranslationDirection> _directions = new()
+        public DictionaryService(string path)
         {
-            new TranslationDirection
-            {
-                Mode = TranslationMode.EngToRus,
-                Title = "Англо-русский",
-                SourceLanguage = "Англо",
-                TargetLanguage = "Русский"
-            },
-            new TranslationDirection
-            {
-                Mode = TranslationMode.RusToEng,
-                Title = "Русско-английский",
-                SourceLanguage = "Русский",
-                TargetLanguage = "Английский"
-            }
-        };
+            filePath = path;
 
-        /// <summary>Путь к файлу словаря по умолчанию.</summary>
-        private readonly string _filePath;
+            // направлений всего два, заполняю сразу
+            TranslationDirection engRus = new TranslationDirection();
+            engRus.Mode = TranslationMode.EngToRus;
+            engRus.Title = "Англо-русский";
+            engRus.SourceLanguage = "Англо";
+            engRus.TargetLanguage = "Русский";
+            directions.Add(engRus);
 
-        /// <summary>Объект для синхронизации доступа к словарю.</summary>
-        private readonly object _lock = new();
+            TranslationDirection rusEng = new TranslationDirection();
+            rusEng.Mode = TranslationMode.RusToEng;
+            rusEng.Title = "Русско-английский";
+            rusEng.SourceLanguage = "Русский";
+            rusEng.TargetLanguage = "Английский";
+            directions.Add(rusEng);
 
-        /// <summary>Результат последней загрузки.</summary>
-        public LoadResult LastLoad { get; private set; } = new();
-
-        /// <summary>
-        /// Создать сервис словаря и загрузить словарь из файла по умолчанию.
-        /// </summary>
-        /// <param name="filePath">Путь к файлу dictionary.txt.</param>
-        public DictionaryService(string filePath)
-        {
-            _filePath = filePath;
+            // при запуске сразу загружаю словарь
             LoadFromFile();
         }
 
-        private static StringComparer CreateComparer()
-        {
-            try
-            {
-                return StringComparer.Create(CultureInfo.GetCultureInfo("ru-RU"), ignoreCase: true);
-            }
-            catch (CultureNotFoundException)
-            {
-                return StringComparer.OrdinalIgnoreCase;
-            }
-        }
+        // ---------- загрузка ----------
 
-        // ============================================================
-        //  ЗАГРУЗКА ИЗ ФАЙЛА
-        // ============================================================
-
-        /// <summary>
-        /// Загрузить «базу данных» словаря из файла по умолчанию.
-        /// </summary>
+        // загрузка из файла по умолчанию
         public LoadResult LoadFromFile()
         {
-            string fileName = Path.GetFileName(_filePath);
+            string fileName = Path.GetFileName(filePath);
 
-            if (!File.Exists(_filePath))
+            if (!File.Exists(filePath))
             {
-                var result = new LoadResult { FileName = fileName };
-                result.Errors.Add($"Файл «{fileName}» не найден.");
-                lock (_lock) LastLoad = result;
-                return result;
+                LastLoad = new LoadResult();
+                LastLoad.FileName = fileName;
+                LastLoad.Errors.Add("Файл «" + fileName + "» не найден.");
+                return LastLoad;
             }
 
-            using var stream = File.OpenRead(_filePath);
-            return LoadFromStream(stream, fileName);
+            using (FileStream stream = File.OpenRead(filePath))
+            {
+                return LoadFromStream(stream, fileName);
+            }
         }
 
-        /// <summary>
-        /// Загрузить «базу данных» словаря из потока (файла, выбранного пользователем).
-        /// Формат строки: английское_слово:русский_перевод1,русский_перевод2,...
-        /// Строки с ошибками пропускаются, их номера попадают в список ошибок.
-        /// Если в файле нет ни одной правильной записи, текущий словарь не меняется.
-        /// </summary>
+        // загрузка из любого файла (и по умолчанию, и выбранного пользователем)
         public LoadResult LoadFromStream(Stream stream, string fileName)
         {
-            var result = new LoadResult { FileName = fileName };
+            LoadResult result = new LoadResult();
+            result.FileName = fileName;
 
-            // Заполняем новые контейнеры, чтобы при ошибке не испортить текущий словарь
-            var engToRus = new SortedDictionary<string, List<string>>(WordComparer);
-            var rusToEng = new SortedDictionary<string, List<string>>(WordComparer);
+            // собираю во временные контейнеры, чтобы плохой файл не испортил рабочий словарь
+            SortedDictionary<string, List<string>> newEngToRus = new SortedDictionary<string, List<string>>(comparer);
+            SortedDictionary<string, List<string>> newRusToEng = new SortedDictionary<string, List<string>>(comparer);
 
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
             {
-                string? line;
                 int lineNumber = 0;
+                string? line = reader.ReadLine();
 
-                while ((line = reader.ReadLine()) != null)
+                // читаю файл построчно, пока строки не закончатся
+                while (line != null)
                 {
                     lineNumber++;
-                    if (string.IsNullOrWhiteSpace(line)) continue;
 
-                    string? error = ParseLine(line, engToRus, rusToEng);
-                    if (error != null)
+                    if (line.Trim() != "")   // пустые строки пропускаю
                     {
-                        result.SkippedLines++;
-                        result.Errors.Add($"Строка {lineNumber}: {error}");
+                        string? error = ParseLine(line, newEngToRus, newRusToEng);
+                        if (error != null)
+                        {
+                            result.SkippedLines++;
+                            result.Errors.Add("Строка " + lineNumber + ": " + error);
+                        }
                     }
+
+                    line = reader.ReadLine();
                 }
             }
 
-            if (engToRus.Count == 0)
+            // ни одной нормальной строки — старый словарь не трогаю
+            if (newEngToRus.Count == 0)
             {
                 result.Errors.Insert(0, "В файле нет ни одной правильной записи. Словарь не изменён.");
-                lock (_lock)
-                {
-                    // Если словарь ещё ни разу не загружался — запоминаем неудачную попытку
-                    if (!LastLoad.Success) LastLoad = result;
-                }
+                if (engToRus.Count == 0)   // если словаря ещё не было, запоминаю эту попытку
+                    LastLoad = result;
                 return result;
             }
 
-            lock (_lock)
-            {
-                _engToRus = engToRus;
-                _rusToEng = rusToEng;
-                BuildLists();
+            // всё хорошо — заменяю словарь новым и пересобираю списки
+            engToRus = newEngToRus;
+            rusToEng = newRusToEng;
+            BuildLists();
 
-                result.Success = true;
-                result.LoadedRecords = _engToRus.Count;
-                LastLoad = result;
-            }
-
+            result.Success = true;
+            result.LoadedRecords = engToRus.Count;
+            LastLoad = result;
             return result;
         }
 
-        /// <summary>
-        /// Разобрать одну строку файла и добавить её в оба контейнера.
-        /// Возвращает текст ошибки или null, если строка правильная.
-        /// </summary>
-        private static string? ParseLine(
-            string line,
-            SortedDictionary<string, List<string>> engToRus,
-            SortedDictionary<string, List<string>> rusToEng)
+        // разбор одной строки, например "book:книга,том,издание"
+        // возвращает текст ошибки или null, если строка правильная
+        private string? ParseLine(string line,
+            SortedDictionary<string, List<string>> engDict,
+            SortedDictionary<string, List<string>> rusDict)
         {
-            int colonPos = line.IndexOf(':');
-            if (colonPos < 0)
+            int colon = line.IndexOf(':');
+            if (colon < 0)
                 return "нет двоеточия (ожидается формат «word:перевод1,перевод2»).";
 
-            string engWord = line.Substring(0, colonPos).Trim().ToLowerInvariant();
-            string rusPart = line.Substring(colonPos + 1).Trim();
-
+            // слева от двоеточия английское слово
+            string engWord = line.Substring(0, colon).Trim().ToLower();
             if (!WordValidator.IsEnglish(engWord))
-                return $"«{engWord}» не является английским словом.";
+                return "«" + engWord + "» не является английским словом.";
 
-            var translations = new List<string>();
-            foreach (string part in rusPart.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            // справа переводы через запятую
+            string[] parts = line.Substring(colon + 1).Split(',');
+            List<string> translations = new List<string>();
+
+            foreach (string part in parts)
             {
-                string rusWord = part.Trim().ToLowerInvariant();
-                if (!WordValidator.IsRussian(rusWord))
-                    return $"«{rusWord}» не является русским словом.";
+                string rusWord = part.Trim().ToLower();
+                if (rusWord == "")
+                    continue;   // лишняя запятая, например "кот,,кошка"
 
-                if (!translations.Contains(rusWord, WordComparer))
+                if (!WordValidator.IsRussian(rusWord))
+                    return "«" + rusWord + "» не является русским словом.";
+
+                if (!translations.Contains(rusWord))
                     translations.Add(rusWord);
             }
 
             if (translations.Count == 0)
-                return $"у слова «{engWord}» нет перевода.";
+                return "у слова «" + engWord + "» нет перевода.";
 
-            // Контейнер №1 (англо-русский). Если слово повторяется — объединяем переводы
-            if (!engToRus.TryGetValue(engWord, out var existing))
-            {
-                existing = new List<string>();
-                engToRus[engWord] = existing;
-            }
-            foreach (string rusWord in translations)
-                if (!existing.Contains(rusWord, WordComparer))
-                    existing.Add(rusWord);
-
-            // Контейнер №2 (русско-английский): каждый русский перевод становится ключом
+            // кладу в оба контейнера: book -> книга и сразу обратно книга -> book
             foreach (string rusWord in translations)
             {
-                if (!rusToEng.TryGetValue(rusWord, out var engList))
-                {
-                    engList = new List<string>();
-                    rusToEng[rusWord] = engList;
-                }
-                if (!engList.Contains(engWord, WordComparer))
-                    engList.Add(engWord);
+                AddPair(engDict, engWord, rusWord);
+                AddPair(rusDict, rusWord, engWord);
             }
-
             return null;
         }
 
-        /// <summary>
-        /// Сформировать обобщённые списки по содержимому контейнеров.
-        /// Вызывается под блокировкой после каждой загрузки.
-        /// </summary>
+        // добавить перевод к слову; если слова ещё нет — создаю для него пустой список
+        private void AddPair(SortedDictionary<string, List<string>> dict, string word, string translation)
+        {
+            if (!dict.ContainsKey(word))
+                dict[word] = new List<string>();
+
+            if (!dict[word].Contains(translation))
+                dict[word].Add(translation);
+        }
+
+        // собираю обобщённые списки из контейнеров (после каждой загрузки)
         private void BuildLists()
         {
-            _englishWords = _engToRus
-                .Select(p => new EnglishWord { Word = p.Key, Translations = new List<string>(p.Value) })
-                .ToList();
+            englishWords = new List<EnglishWord>();
+            foreach (string word in engToRus.Keys)
+            {
+                EnglishWord w = new EnglishWord();
+                w.Word = word;
+                w.Translations = engToRus[word];
+                englishWords.Add(w);
+            }
 
-            _russianWords = _rusToEng
-                .Select(p => new RussianWord { Word = p.Key, Translations = new List<string>(p.Value) })
-                .ToList();
+            russianWords = new List<RussianWord>();
+            foreach (string word in rusToEng.Keys)
+            {
+                RussianWord w = new RussianWord();
+                w.Word = word;
+                w.Translations = rusToEng[word];
+                russianWords.Add(w);
+            }
 
-            _synonyms = new List<SynonymInfo>();
-            foreach (var w in _englishWords.Where(w => w.HasSynonyms))
-                _synonyms.Add(new SynonymInfo { Word = w.Word, Direction = TranslationMode.EngToRus, Synonyms = w.Translations });
-            foreach (var w in _russianWords.Where(w => w.HasSynonyms))
-                _synonyms.Add(new SynonymInfo { Word = w.Word, Direction = TranslationMode.RusToEng, Synonyms = w.Translations });
+            // синонимы — слова, у которых больше одного перевода
+            synonyms = new List<SynonymInfo>();
+            foreach (EnglishWord w in englishWords)
+            {
+                if (w.HasSynonyms)
+                {
+                    SynonymInfo s = new SynonymInfo();
+                    s.Word = w.Word;
+                    s.Direction = TranslationMode.EngToRus;
+                    s.Synonyms = w.Translations;
+                    synonyms.Add(s);
+                }
+            }
+            foreach (RussianWord w in russianWords)
+            {
+                if (w.HasSynonyms)
+                {
+                    SynonymInfo s = new SynonymInfo();
+                    s.Word = w.Word;
+                    s.Direction = TranslationMode.RusToEng;
+                    s.Synonyms = w.Translations;
+                    synonyms.Add(s);
+                }
+            }
 
-            foreach (var d in _directions)
-                d.WordsCount = d.Mode == TranslationMode.EngToRus ? _engToRus.Count : _rusToEng.Count;
+            // сколько слов в каждом направлении
+            directions[0].WordsCount = engToRus.Count;
+            directions[1].WordsCount = rusToEng.Count;
         }
 
-        // ============================================================
-        //  ПЕРЕВОД
-        // ============================================================
+        // ---------- перевод ----------
 
-        /// <summary>
-        /// Найти перевод английского слова.
-        /// Возвращает список русских переводов (синонимов) или пустой список.
-        /// </summary>
+        // англ -> рус; если слова нет — пустой список
         public List<string> TranslateEngToRus(string word)
         {
-            if (string.IsNullOrWhiteSpace(word))
-                return new List<string>();
-
-            lock (_lock)
-            {
-                return _engToRus.TryGetValue(word.Trim(), out var translations)
-                    ? new List<string>(translations)
-                    : new List<string>();
-            }
+            word = word.Trim();
+            if (engToRus.ContainsKey(word))
+                return new List<string>(engToRus[word]);
+            return new List<string>();
         }
 
-        /// <summary>
-        /// Найти перевод русского слова.
-        /// Возвращает список английских переводов (синонимов) или пустой список.
-        /// </summary>
+        // рус -> англ
         public List<string> TranslateRusToEng(string word)
         {
-            if (string.IsNullOrWhiteSpace(word))
-                return new List<string>();
-
-            lock (_lock)
-            {
-                return _rusToEng.TryGetValue(word.Trim(), out var translations)
-                    ? new List<string>(translations)
-                    : new List<string>();
-            }
+            word = word.Trim();
+            if (rusToEng.ContainsKey(word))
+                return new List<string>(rusToEng[word]);
+            return new List<string>();
         }
 
-        /// <summary>Перевод слова в заданном режиме работы.</summary>
-        public List<string> Translate(string word, TranslationMode mode) =>
-            mode == TranslationMode.EngToRus
-                ? TranslateEngToRus(word)
-                : TranslateRusToEng(word);
-
-        // ============================================================
-        //  ОБОБЩЁННЫЕ СПИСКИ (ЗАПРОСЫ)
-        // ============================================================
-
-        /// <summary>
-        /// Список английских слов с русскими переводами.
-        /// ascending = true — по алфавиту (A→Z), false — в обратном порядке (Z→A).
-        /// </summary>
-        public List<EnglishWord> GetEnglishWords(bool ascending = true)
+        // перевод по выбранному режиму
+        public List<string> Translate(string word, TranslationMode mode)
         {
-            lock (_lock)
-            {
-                var list = new List<EnglishWord>(_englishWords);
-                if (!ascending) list.Reverse();
-                return list;
-            }
+            if (mode == TranslationMode.EngToRus)
+                return TranslateEngToRus(word);
+            else
+                return TranslateRusToEng(word);
         }
 
-        /// <summary>
-        /// Список русских слов с английскими переводами.
-        /// ascending = true — по алфавиту (А→Я), false — в обратном порядке (Я→А).
-        /// </summary>
-        public List<RussianWord> GetRussianWords(bool ascending = true)
+        // ---------- запросы ----------
+
+        // английские слова по алфавиту (A→Z) или наоборот (Z→A)
+        public List<EnglishWord> GetEnglishWords(bool ascending)
         {
-            lock (_lock)
-            {
-                var list = new List<RussianWord>(_russianWords);
-                if (!ascending) list.Reverse();
-                return list;
-            }
+            List<EnglishWord> list = new List<EnglishWord>(englishWords);
+            if (!ascending)
+                list.Reverse();
+            return list;
         }
 
-        /// <summary>
-        /// Слова, имеющие несколько синонимичных переводов.
-        /// direction = null — в обоих направлениях.
-        /// </summary>
-        public List<SynonymInfo> GetSynonyms(TranslationMode? direction = null)
+        // русские слова по алфавиту (А→Я) или наоборот (Я→А)
+        public List<RussianWord> GetRussianWords(bool ascending)
         {
-            lock (_lock)
-            {
-                return _synonyms
-                    .Where(s => direction == null || s.Direction == direction)
-                    .ToList();
-            }
+            List<RussianWord> list = new List<RussianWord>(russianWords);
+            if (!ascending)
+                list.Reverse();
+            return list;
         }
 
-        /// <summary>Список направлений перевода.</summary>
+        // слова с несколькими переводами; direction = null — оба направления
+        public List<SynonymInfo> GetSynonyms(TranslationMode? direction)
+        {
+            List<SynonymInfo> list = new List<SynonymInfo>();
+            foreach (SynonymInfo s in synonyms)
+            {
+                if (direction == null || s.Direction == direction)
+                    list.Add(s);
+            }
+            return list;
+        }
+
+        // направления перевода
         public List<TranslationDirection> GetDirections()
         {
-            lock (_lock)
-            {
-                return new List<TranslationDirection>(_directions);
-            }
+            return directions;
         }
 
-        // ============================================================
-        //  СТАТИСТИКА
-        // ============================================================
+        // ---------- статистика ----------
 
-        /// <summary>
-        /// Статистика словаря, в том числе общее количество записей.
-        /// </summary>
+        // цифры для плиток. Записей = сколько англ. слов (одна строка файла = одна запись)
         public DictionaryStats GetStats()
         {
-            lock (_lock)
+            DictionaryStats stats = new DictionaryStats();
+            stats.RecordsCount = engToRus.Count;
+            stats.EngWordsCount = engToRus.Count;
+            stats.RusWordsCount = rusToEng.Count;
+
+            foreach (string word in engToRus.Keys)
+                stats.TranslationPairsCount += engToRus[word].Count;
+
+            foreach (SynonymInfo s in synonyms)
             {
-                return new DictionaryStats
-                {
-                    RecordsCount = _engToRus.Count,
-                    EngWordsCount = _engToRus.Count,
-                    RusWordsCount = _rusToEng.Count,
-                    TranslationPairsCount = _engToRus.Sum(p => p.Value.Count),
-                    EngWordsWithSynonymsCount = _englishWords.Count(w => w.HasSynonyms),
-                    RusWordsWithSynonymsCount = _russianWords.Count(w => w.HasSynonyms)
-                };
+                if (s.Direction == TranslationMode.EngToRus)
+                    stats.EngWordsWithSynonymsCount++;
+                else
+                    stats.RusWordsWithSynonymsCount++;
             }
+
+            return stats;
         }
     }
 }

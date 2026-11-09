@@ -1,8 +1,6 @@
 namespace DictionaryWebApp.Models
 {
-    /// <summary>
-    /// Режим работы словаря (направление перевода).
-    /// </summary>
+    // режим работы словаря
     public enum TranslationMode
     {
         EngToRus,   // англо-русский

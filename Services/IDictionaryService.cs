@@ -2,52 +2,26 @@ using DictionaryWebApp.Models;
 
 namespace DictionaryWebApp.Services
 {
-    /// <summary>
-    /// Интерфейс сервиса словаря.
-    /// Определяет набор методов для работы с англо-русским
-    /// и русско-английским словарём.
-    /// </summary>
+    // список того, что умеет словарь (сами методы написаны в DictionaryService)
     public interface IDictionaryService
     {
-        // ========== Загрузка «базы данных» из файла ==========
+        // загрузка
+        LoadResult LoadFromFile();                                   // из Data/dictionary.txt
+        LoadResult LoadFromStream(Stream stream, string fileName);   // из выбранного файла
+        LoadResult LastLoad { get; }                                 // результат последней загрузки
 
-        /// <summary>Загрузить словарь из файла по умолчанию (Data/dictionary.txt).</summary>
-        LoadResult LoadFromFile();
-
-        /// <summary>Загрузить словарь из файла, выбранного пользователем.</summary>
-        LoadResult LoadFromStream(Stream stream, string fileName);
-
-        /// <summary>Результат последней загрузки.</summary>
-        LoadResult LastLoad { get; }
-
-        // ========== Перевод ==========
-
-        /// <summary>Перевод английского слова на русский (список переводов).</summary>
+        // перевод
         List<string> TranslateEngToRus(string word);
-
-        /// <summary>Перевод русского слова на английский (список переводов).</summary>
         List<string> TranslateRusToEng(string word);
-
-        /// <summary>Перевод слова в заданном режиме.</summary>
         List<string> Translate(string word, TranslationMode mode);
 
-        // ========== Обобщённые списки ==========
-
-        /// <summary>Сведения об английских словах (по алфавиту или в обратном порядке).</summary>
-        List<EnglishWord> GetEnglishWords(bool ascending = true);
-
-        /// <summary>Сведения о русских словах (по алфавиту или в обратном порядке).</summary>
-        List<RussianWord> GetRussianWords(bool ascending = true);
-
-        /// <summary>Сведения о синонимичных переводах (null — оба направления).</summary>
-        List<SynonymInfo> GetSynonyms(TranslationMode? direction = null);
-
-        /// <summary>Сведения о направлениях перевода.</summary>
+        // списки
+        List<EnglishWord> GetEnglishWords(bool ascending);
+        List<RussianWord> GetRussianWords(bool ascending);
+        List<SynonymInfo> GetSynonyms(TranslationMode? direction);   // null — оба направления
         List<TranslationDirection> GetDirections();
 
-        // ========== Статистика ==========
-
-        /// <summary>Статистика словаря, в т.ч. общее количество записей.</summary>
+        // статистика
         DictionaryStats GetStats();
     }
 }

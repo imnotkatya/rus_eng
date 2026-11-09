@@ -5,72 +5,69 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace DictionaryWebApp.Pages
 {
-    /// <summary>
-    /// Пункт меню «Загрузка»: загрузка «базы данных» словаря из файла.
-    /// </summary>
+    // страница «Загрузка»: загрузка словаря из файла
     public class LoadModel : PageModel
     {
-        /// <summary>Максимальный размер загружаемого файла — 1 МБ.</summary>
-        private const long MaxFileSize = 1024 * 1024;
+        private IDictionaryService dictionary;
 
-        private readonly IDictionaryService _dictionary;
-
-        public LoadModel(IDictionaryService dictionary)
+        public LoadModel(IDictionaryService dict)
         {
-            _dictionary = dictionary;
+            dictionary = dict;
         }
 
-        /// <summary>Файл, выбранный пользователем.</summary>
+        // файл, который выбрал пользователь
         [BindProperty]
         public IFormFile? Upload { get; set; }
 
-        /// <summary>Результат загрузки (последней или только что выполненной).</summary>
-        public LoadResult Result { get; set; } = new();
-
-        /// <summary>Была ли загрузка выполнена на этом запросе.</summary>
-        public bool JustLoaded { get; set; }
-
-        /// <summary>Сообщение об ошибке выбора файла.</summary>
+        public LoadResult Result { get; set; } = new LoadResult();
         public string? ErrorMessage { get; set; }
+        public DictionaryStats Stats { get; set; } = new DictionaryStats();
 
-        /// <summary>Статистика словаря.</summary>
-        public DictionaryStats Stats { get; set; } = new();
-
+        // просто открыли страницу — показываю, какой словарь сейчас загружен
         public void OnGet()
         {
-            Result = _dictionary.LastLoad;
-            Stats = _dictionary.GetStats();
+            Result = dictionary.LastLoad;
+            Stats = dictionary.GetStats();
         }
 
-        /// <summary>Перезагрузить словарь из файла по умолчанию Data/dictionary.txt.</summary>
+        // кнопка «Загрузить из Data/dictionary.txt»
         public void OnPostReload()
         {
-            Result = _dictionary.LoadFromFile();
-            JustLoaded = true;
-            Stats = _dictionary.GetStats();
+            Result = dictionary.LoadFromFile();
+            Stats = dictionary.GetStats();
         }
 
-        /// <summary>Загрузить словарь из файла, выбранного пользователем.</summary>
+        // кнопка «Загрузить выбранный файл»
         public void OnPostUpload()
         {
+            // сначала проверяю сам файл
             if (Upload == null || Upload.Length == 0)
+            {
                 ErrorMessage = "Выберите непустой файл словаря.";
-            else if (!Path.GetExtension(Upload.FileName).Equals(".txt", StringComparison.OrdinalIgnoreCase))
+            }
+            else if (Path.GetExtension(Upload.FileName).ToLower() != ".txt")
+            {
                 ErrorMessage = "Файл словаря должен иметь расширение .txt.";
-            else if (Upload.Length > MaxFileSize)
+            }
+            else if (Upload.Length > 1024 * 1024)
+            {
                 ErrorMessage = "Файл слишком большой (не более 1 МБ).";
+            }
 
             if (ErrorMessage != null)
             {
-                Result = _dictionary.LastLoad;
-                Stats = _dictionary.GetStats();
+                // файл плохой — оставляю старый словарь
+                Result = dictionary.LastLoad;
+                Stats = dictionary.GetStats();
                 return;
             }
 
-            using var stream = Upload!.OpenReadStream();
-            Result = _dictionary.LoadFromStream(stream, Path.GetFileName(Upload.FileName));
-            JustLoaded = true;
-            Stats = _dictionary.GetStats();
+            // файл нормальный — загружаю
+            using (Stream stream = Upload!.OpenReadStream())
+            {
+                Result = dictionary.LoadFromStream(stream, Upload.FileName);
+            }
+            Stats = dictionary.GetStats();
         }
     }
 }

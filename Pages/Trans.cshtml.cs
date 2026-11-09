@@ -5,56 +5,47 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace DictionaryWebApp.Pages
 {
-    /// <summary>
-    /// Пункт меню «Перевод»: выбор режима работы и вывод перевода
-    /// заданного английского или русского слова.
-    /// </summary>
+    // страница «Перевод»
     public class TransModel : PageModel
     {
-        private readonly IDictionaryService _dictionary;
+        private IDictionaryService dictionary;
 
-        public TransModel(IDictionaryService dictionary)
+        // словарь приходит сам (его создали в Program.cs)
+        public TransModel(IDictionaryService dict)
         {
-            _dictionary = dictionary;
+            dictionary = dict;
         }
 
-        /// <summary>Введённое слово.</summary>
+        // слово из поля ввода
         [BindProperty]
-        public string Word { get; set; } = "";
+        public string? Word { get; set; }
 
-        /// <summary>Выбранный режим работы (направление перевода).</summary>
-        [BindProperty(SupportsGet = true)]
+        // выбранный режим
+        [BindProperty]
         public TranslationMode Mode { get; set; } = TranslationMode.EngToRus;
 
-        /// <summary>Список направлений перевода для выбора режима.</summary>
-        public List<TranslationDirection> Directions { get; set; } = new();
+        public List<TranslationDirection> Directions { get; set; } = new List<TranslationDirection>();
+        public List<string>? Translations { get; set; }   // null — ещё не искали
+        public string? ErrorMessage { get; set; }         // текст ошибки ввода
 
-        /// <summary>Список найденных переводов.</summary>
-        public List<string>? Translations { get; set; }
-
-        /// <summary>Флаг: была ли нажата кнопка «Перевести».</summary>
-        public bool Searched { get; set; }
-
-        /// <summary>Сообщение об ошибке ввода.</summary>
-        public string? ErrorMessage { get; set; }
-
+        // просто открыли страницу
         public void OnGet()
         {
-            Directions = _dictionary.GetDirections();
+            Directions = dictionary.GetDirections();
         }
 
+        // нажали «Перевести»
         public void OnPost()
         {
-            Directions = _dictionary.GetDirections();
-            Searched = true;
+            Directions = dictionary.GetDirections();
 
-            // Контроль правильности ввода
+            // сначала проверяю, правильно ли введено слово
             ErrorMessage = WordValidator.Validate(Word, Mode);
-            if (ErrorMessage != null)
-                return;
-
-            Word = Word.Trim();
-            Translations = _dictionary.Translate(Word, Mode);
+            if (ErrorMessage == null)
+            {
+                Word = Word!.Trim();
+                Translations = dictionary.Translate(Word, Mode);
+            }
         }
     }
 }

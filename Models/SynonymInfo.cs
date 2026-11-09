@@ -1,18 +1,10 @@
 namespace DictionaryWebApp.Models
 {
-    /// <summary>
-    /// Сведения о синонимичных переводах
-    /// (элемент обобщённого списка слов, имеющих несколько переводов).
-    /// </summary>
+    // слово, у которого несколько переводов
     public class SynonymInfo
     {
-        /// <summary>Исходное слово.</summary>
-        public string Word { get; init; } = "";
-
-        /// <summary>Направление перевода, в котором у слова есть синонимы.</summary>
-        public TranslationMode Direction { get; init; }
-
-        /// <summary>Синонимичные переводы слова.</summary>
-        public List<string> Synonyms { get; init; } = new();
+        public string Word { get; set; } = "";
+        public TranslationMode Direction { get; set; }           // в каком направлении
+        public List<string> Synonyms { get; set; } = new List<string>();
     }
 }

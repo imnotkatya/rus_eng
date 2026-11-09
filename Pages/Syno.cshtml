@@ -11,15 +11,34 @@
     <div class="control-group">
         <label for="Mode">Направление:</label>
         <select name="Mode" id="Mode" onchange="this.form.submit()">
-            <!option value="" selected="@(Model.Mode == null)">Оба направления</!option>
-            @foreach (var dir in Model.Directions)
+            @if (Model.Mode == null)
             {
-                <!option value="@dir.Mode" selected="@(dir.Mode == Model.Mode)">@dir.ShortTitle</!option>
+                <option value="" selected>Оба направления</option>
+            }
+            else
+            {
+                <option value="">Оба направления</option>
+            }
+
+            @if (Model.Mode == TranslationMode.EngToRus)
+            {
+                <option value="EngToRus" selected>Англо → Русский</option>
+            }
+            else
+            {
+                <option value="EngToRus">Англо → Русский</option>
+            }
+
+            @if (Model.Mode == TranslationMode.RusToEng)
+            {
+                <option value="RusToEng" selected>Русский → Английский</option>
+            }
+            else
+            {
+                <option value="RusToEng">Русский → Английский</option>
             }
         </select>
     </div>
-
-    <noscript><button type="submit">Показать</button></noscript>
 
     <div class="total-count">
         Найдено слов: <strong>@Model.Words.Count</strong>
@@ -28,27 +47,30 @@
 
 @if (Model.Words.Count == 0)
 {
-    <div class="result error">
-        ⚠️ В словаре нет слов с несколькими переводами.
-    </div>
+    <div class="result error">⚠️ В словаре нет слов с несколькими переводами.</div>
 }
-else
-{
-    <div class="syno-list">
-        @foreach (var item in Model.Words)
-        {
-            <div class="syno-card">
-                <div class="syno-word">
-                    @item.Word
-                    <div class="syno-dir">@(item.Direction == TranslationMode.EngToRus ? "англ. → рус." : "рус. → англ.")</div>
-                </div>
-                <div class="syno-translations">
-                    @foreach (var translation in item.Synonyms)
-                    {
-                        <span class="syno-tag">@translation</span>
-                    }
-                </div>
+
+<div class="syno-list">
+    @foreach (SynonymInfo item in Model.Words)
+    {
+        <div class="syno-card">
+            <div class="syno-word">
+                @item.Word
+                @if (item.Direction == TranslationMode.EngToRus)
+                {
+                    <div class="syno-dir">англ. → рус.</div>
+                }
+                else
+                {
+                    <div class="syno-dir">рус. → англ.</div>
+                }
             </div>
-        }
-    </div>
-}
+            <div class="syno-translations">
+                @foreach (string t in item.Synonyms)
+                {
+                    <span class="syno-tag">@t</span>
+                }
+            </div>
+        </div>
+    }
+</div>
